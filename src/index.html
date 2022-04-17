@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <script type="module" src="/build/browser-database.esm.js"></script>
+    <script nomodule src="/build/browser-database.js"></script>
+    <title>Browser Database Playground</title>
+  </head>
+  <body>
+    
+
+    <browser-database
+      title="File database"
+      visible="true"
+    ></browser-database>
+
+    <browser-database 
+      id="music" 
+      title="Music database"
+      db-name="music-database" 
+      db-store-name="music-store"
+      manifestName="music-list"
+      geotag="true"
+      timetag="true"
+      visible="true"
+      icon="library_music"
+      accept=".mp3,.wav,.flac,.ogg"
+    ></browser-database>
+
+    <browser-database 
+      id="images" 
+      title="Image database"
+      db-name="image-database" 
+      db-store-name="image-store"
+      manifestName="image-list"
+      geotag="true"
+      timetag="true"
+      visible="true"
+      icon="image"
+      accept="image/*"
+    ></browser-database>
+
+    
+
+    <!-- not displayed -->
+    <browser-database 
+      id="coordinates-database"
+      db-name="coordinates-database" 
+      db-store-name="coordinates-store"
+      manifestName="coordinates-list"
+    />
+    
+    <script>
+      (async function(){
+        await customElements.whenDefined('browser-database')
+        navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+          const toDigit = 1000
+          const lat = Math.floor(coords.latitude * toDigit) / toDigit
+          const long = Math.floor(coords.longitude * toDigit) / toDigit
+          
+          await db.set(
+            Date.now().toString(), 
+            JSON.stringify({
+              lat,
+              long
+            })
+          )
+        })
+      })()
+    </script>
+
+    <!-- if opening a modal, closes any other modals -->
+    <script>
+      const allNodes = document.querySelectorAll('browser-database')
+      allNodes.forEach((node, i, arr) => {
+        node.addEventListener('modalOpened', (event) => {
+          arr.forEach(n => {
+            if (event.target.id === n.id) return
+            n.close()
+          })
+        })
+      })
+    </script>
+  </body>
+</html>
